@@ -39,6 +39,8 @@ RUN set -eux; \
         remoteip \
     ; \
     a2enmod \
+        proxy \
+        proxy_fcgi \
         remoteip \
         rewrite \
     ;
