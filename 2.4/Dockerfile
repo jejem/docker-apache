@@ -42,3 +42,10 @@ RUN set -eux; \
         remoteip \
         rewrite \
     ;
+
+COPY docker-apache-entrypoint /usr/local/bin/
+COPY apache2-foreground /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-apache-entrypoint /usr/local/bin/apache2-foreground
+
+ENTRYPOINT ["docker-apache-entrypoint"]
+CMD ["apache2-foreground"]
