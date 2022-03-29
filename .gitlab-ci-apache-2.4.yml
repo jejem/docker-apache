@@ -1,0 +1,50 @@
+build-apache-2.4:
+  stage: build
+  only:
+    refs:
+      - master
+    changes:
+      - 2.4/*
+  script:
+    - docker build --pull -t $CI_REGISTRY_IMAGE:2.4-$CI_COMMIT_SHORT_SHA 2.4/
+    - docker push $CI_REGISTRY_IMAGE:2.4-$CI_COMMIT_SHORT_SHA
+
+test-apache-2.4:
+  stage: test
+  needs: ["build-apache-2.4"]
+  only:
+    refs:
+      - master
+    changes:
+      - 2.4/*
+  script:
+    #- docker pull $CI_REGISTRY_IMAGE:2.4-$CI_COMMIT_SHORT_SHA
+    - exit 0
+
+deploy-apache-2.4:
+  stage: deploy
+  needs: ["test-apache-2.4"]
+  only:
+    refs:
+      - master
+    changes:
+      - 2.4/*
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:2.4-$CI_COMMIT_SHORT_SHA
+    - docker tag $CI_REGISTRY_IMAGE:2.4-$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE:2.4
+    - docker push $CI_REGISTRY_IMAGE:2.4
+
+#deploy-apache-2.4-to-hub:
+#  stage: deploy
+#  needs: ["test-apache-2.4"]
+#  only:
+#    refs:
+#      - master
+#    changes:
+#      - 2.4/*
+#  script:
+#    - echo $DOCKER_HUB_PASSWORD |docker login -u $DOCKER_HUB_USER --password-stdin
+#    - docker pull $CI_REGISTRY_IMAGE:2.4-$CI_COMMIT_SHORT_SHA
+#    - docker tag $CI_REGISTRY_IMAGE:2.4-$CI_COMMIT_SHORT_SHA $DOCKER_HUB_REPOSITORY:2.4
+#    - docker push $DOCKER_HUB_REPOSITORY:2.4
+#    - docker rmi $DOCKER_HUB_REPOSITORY:2.4
