@@ -5,6 +5,7 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         apache2 \
+        elinks \
         locales \
     ; \
     rm -rf /var/lib/apt/lists/*
