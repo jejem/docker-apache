@@ -1,5 +1,8 @@
-FROM debian:bullseye
+FROM debian:bullseye-slim
 MAINTAINER Jérémy "Jejem" Desvages <jejem@phyrexia.org>
+
+ENV APACHE_CONFDIR /etc/apache2
+ENV APACHE_ENVVARS $APACHE_CONFDIR/envvars
 
 RUN set -eux; \
     apt-get update; \
@@ -27,6 +30,39 @@ RUN set -eux; \
     DEBIAN_FRONTEND=noninteractive dpkg-reconfigure tzdata
 
 RUN set -eux; \
+    sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' "$APACHE_ENVVARS"; \
+    \
+    . "$APACHE_ENVVARS"; \
+    for dir in \
+        "$APACHE_LOCK_DIR" \
+        "$APACHE_RUN_DIR" \
+        "$APACHE_LOG_DIR" \
+    ; do \
+        rm -rvf "$dir"; \
+        mkdir -p "$dir"; \
+        chown "$APACHE_RUN_USER:$APACHE_RUN_GROUP" "$dir"; \
+        chmod 777 "$dir"; \
+    done; \
+    \
+    rm -rvf /var/www/html/*; \
+    \
+    ln -sfT /dev/stderr "$APACHE_LOG_DIR/error.log"; \
+    ln -sfT /dev/stdout "$APACHE_LOG_DIR/access.log"; \
+    ln -sfT /dev/stdout "$APACHE_LOG_DIR/other_vhosts_access.log"; \
+    chown -R --no-dereference "$APACHE_RUN_USER:$APACHE_RUN_GROUP" "$APACHE_LOG_DIR"
+
+RUN { \
+        echo 'DirectoryIndex disabled'; \
+        echo 'DirectoryIndex index.php index.html'; \
+        echo; \
+        echo '<Directory /var/www/>'; \
+        echo '\tOptions -Indexes'; \
+        echo '\tAllowOverride All'; \
+        echo '</Directory>'; \
+    } | tee "$APACHE_CONFDIR/conf-available/docker-apache.conf" \
+    && a2enconf docker-apache
+
+RUN set -eux; \
     echo "RemoteIPHeader X-Forwarded-For" > /etc/apache2/conf-available/remoteip.conf; \
     echo "RemoteIPTrustedProxy 10.0.0.0/8" >> /etc/apache2/conf-available/remoteip.conf; \
     echo "RemoteIPTrustedProxy 172.16.0.0/12" >> /etc/apache2/conf-available/remoteip.conf; \
@@ -40,15 +76,18 @@ RUN set -eux; \
         remoteip \
     ; \
     a2enmod \
-        proxy \
         proxy_fcgi \
         remoteip \
         rewrite \
     ;
 
 COPY docker-apache-entrypoint /usr/local/bin/
-COPY apache2-foreground /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-apache-entrypoint /usr/local/bin/apache2-foreground
 
 ENTRYPOINT ["docker-apache-entrypoint"]
+STOPSIGNAL SIGWINCH
+
+COPY apache2-foreground /usr/local/bin/
+WORKDIR /var/www/html
+
+EXPOSE 80
 CMD ["apache2-foreground"]
