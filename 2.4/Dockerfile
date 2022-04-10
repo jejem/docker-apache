@@ -53,11 +53,11 @@ RUN set -eux; \
 
 RUN { \
         echo 'DirectoryIndex disabled'; \
-        echo 'DirectoryIndex index.php index.html'; \
+        echo 'DirectoryIndex index.html index.htm'; \
         echo; \
         echo '<Directory /var/www/>'; \
         echo '\tOptions -Indexes'; \
-        echo '\tAllowOverride All'; \
+        echo '\tAllowOverride None'; \
         echo '</Directory>'; \
     } | tee "$APACHE_CONFDIR/conf-available/docker-apache.conf" \
     && a2enconf docker-apache
