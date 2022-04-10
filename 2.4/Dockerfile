@@ -81,12 +81,12 @@ RUN set -eux; \
         rewrite \
     ;
 
-COPY docker-apache-entrypoint /usr/local/bin/
+COPY --from=php:apache-bullseye /usr/local/bin/docker-php-entrypoint /usr/local/bin/docker-apache-entrypoint
 
 ENTRYPOINT ["docker-apache-entrypoint"]
 STOPSIGNAL SIGWINCH
 
-COPY apache2-foreground /usr/local/bin/
+COPY --from=php:apache-bullseye /usr/local/bin/apache2-foreground /usr/local/bin/
 WORKDIR /var/www/html
 
 EXPOSE 80
