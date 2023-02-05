@@ -53,7 +53,7 @@ RUN set -eux; \
 
 RUN { \
         echo 'DirectoryIndex disabled'; \
-        echo 'DirectoryIndex index.html index.htm'; \
+        echo 'DirectoryIndex index.php index.html index.htm'; \
         echo; \
         echo '<Directory /var/www/>'; \
         echo '\tOptions -Indexes'; \
@@ -76,10 +76,13 @@ RUN set -eux; \
         remoteip \
     ; \
     a2enmod \
+        http2 \
         proxy_fcgi \
         remoteip \
         rewrite \
     ;
+
+COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
 
 COPY --from=php:apache-bullseye /usr/local/bin/docker-php-entrypoint /usr/local/bin/docker-apache-entrypoint
 
