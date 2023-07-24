@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 MAINTAINER Jérémy "Jejem" Desvages <jejem@phyrexia.org>
 
 ENV APACHE_CONFDIR /etc/apache2
