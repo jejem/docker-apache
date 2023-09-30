@@ -89,7 +89,7 @@ COPY --from=php:apache-bookworm /usr/local/bin/docker-php-entrypoint /usr/local/
 ENTRYPOINT ["docker-apache-entrypoint"]
 STOPSIGNAL SIGWINCH
 
-COPY --from=php:apache-bullseye /usr/local/bin/apache2-foreground /usr/local/bin/
+COPY --from=php:apache-bookworm /usr/local/bin/apache2-foreground /usr/local/bin/
 WORKDIR /var/www/html
 
 EXPOSE 80
