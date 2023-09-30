@@ -84,7 +84,7 @@ RUN set -eux; \
 
 COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
 
-COPY --from=php:apache-bullseye /usr/local/bin/docker-php-entrypoint /usr/local/bin/docker-apache-entrypoint
+COPY --from=php:apache-bookworm /usr/local/bin/docker-php-entrypoint /usr/local/bin/docker-apache-entrypoint
 
 ENTRYPOINT ["docker-apache-entrypoint"]
 STOPSIGNAL SIGWINCH
